@@ -1,202 +1,171 @@
-# Examen Práctico de DevOps - Flask + PostgreSQL + Docker + GHCR
+# DevOps Flask PostgreSQL
 
-Este proyecto cumple los parámetros del examen práctico de DevOps usando:
+Proyecto práctico de DevOps desarrollado con Flask, PostgreSQL, pgAdmin, Docker Compose, GitHub Actions y GitHub Container Registry.
 
-- Flask
-- PostgreSQL
-- pgAdmin
-- Dockerfile
-- Docker Compose
-- GitHub Actions
-- GitHub Container Registry, GHCR
+## Descripción
 
-## 1. Estructura del proyecto
+La aplicación permite visualizar información general del sistema y consultar productos almacenados en una base de datos PostgreSQL.
+
+La ruta principal muestra:
+
+* Nombre de la aplicación.
+* Versión actual.
+* Estado de conexión con PostgreSQL.
+
+Además, cuenta con una ruta para listar los productos registrados en la base de datos.
+
+## Tecnologías utilizadas
+
+* Python
+* Flask
+* PostgreSQL
+* pgAdmin
+* Docker
+* Docker Compose
+* GitHub Actions
+* GitHub Container Registry
+
+## Estructura del proyecto
 
 ```text
 devops-flask-postgres/
+│
 ├── app.py
 ├── requirements.txt
 ├── Dockerfile
 ├── docker-compose.yml
 ├── VERSION
+├── README.md
+│
 ├── db/
 │   └── init.sql
+│
 └── .github/
     └── workflows/
         └── docker-ghcr.yml
 ```
 
-## 2. Variables de entorno usadas
+## Variables de entorno
 
-La aplicación usa variables de entorno para configurar:
+La aplicación utiliza variables de entorno configuradas desde Docker Compose:
 
-- Nombre de la aplicación: `APP_NAME`
-- Versión de la aplicación: `APP_VERSION`
-- Nombre de base de datos: `DB_NAME`
-- Usuario de base de datos: `DB_USER`
-- Contraseña de base de datos: `DB_PASSWORD`
-- Host de base de datos: `DB_HOST`
-- Puerto de base de datos: `DB_PORT`
+```text
+APP_NAME
+APP_VERSION
+DB_HOST
+DB_PORT
+DB_NAME
+DB_USER
+DB_PASSWORD
+```
 
-Estas variables están configuradas en `docker-compose.yml`.
+Estas variables permiten configurar el nombre de la aplicación, la versión y los datos de conexión a PostgreSQL.
 
-## 3. Levantar el proyecto
+## Base de datos
 
-Ejecuta:
+Se crea una base de datos PostgreSQL con una tabla llamada `productos`.
+
+La tabla contiene los siguientes campos:
+
+* `id`
+* `nombre`
+* `precio`
+* `stock`
+
+El archivo `db/init.sql` crea la tabla e inserta cinco registros iniciales.
+
+## Ejecución del proyecto
+
+Para levantar los servicios, ejecutar:
 
 ```bash
 docker compose up --build
 ```
 
-Servicios disponibles:
+El proyecto levanta tres servicios:
+
+* Aplicación Flask
+* PostgreSQL
+* pgAdmin
+
+## Rutas disponibles
+
+Ruta principal:
 
 ```text
-Aplicación Flask: http://localhost:5000
-Productos:        http://localhost:5000/productos
-Productos JSON:   http://localhost:5000/api/productos
-pgAdmin:          http://localhost:8080
-PostgreSQL:       localhost:5432
+http://localhost:5000
 ```
 
-## 4. Credenciales de pgAdmin
+Ruta para visualizar productos:
+
+```text
+http://localhost:5000/productos
+```
+
+pgAdmin:
+
+```text
+http://localhost:8080
+```
+
+## Acceso a pgAdmin
+
+Credenciales de acceso:
 
 ```text
 Email: admin@admin.com
 Password: admin123
 ```
 
-## 5. Conexión desde pgAdmin hacia PostgreSQL
-
-Dentro de pgAdmin, crea un nuevo servidor con estos datos:
+Datos para registrar el servidor PostgreSQL en pgAdmin:
 
 ```text
-Name: Examen PostgreSQL
 Host: postgres
 Port: 5432
-Maintenance database: devops_db
+Database: devops_db
 Username: devops_user
 Password: devops_pass
 ```
 
-## 6. Tabla productos
+## Docker
 
-La tabla se crea automáticamente desde `db/init.sql`.
+El proyecto incluye un `Dockerfile` para construir la imagen de la aplicación Flask.
 
-```sql
-CREATE TABLE IF NOT EXISTS productos (
-    id SERIAL PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
-    precio NUMERIC(10, 2) NOT NULL,
-    stock INTEGER NOT NULL
-);
-```
+También se utiliza `docker-compose.yml` para levantar todos los servicios necesarios y configurar la persistencia de datos mediante volúmenes.
 
-También se insertan cinco registros iniciales.
+## GitHub Actions
 
-## 7. Dockerfile
-
-El `Dockerfile` crea una imagen de la aplicación Flask usando Python 3.12 y Gunicorn.
-
-## 8. Docker Compose
-
-El archivo `docker-compose.yml` levanta tres servicios:
-
-- `postgres`
-- `pgadmin`
-- `flask_app`
-
-También configura volúmenes para persistencia:
-
-- `postgres_data`
-- `pgadmin_data`
-
-## 9. GitHub Actions y GHCR
-
-El workflow está en:
+El proyecto incluye un workflow en:
 
 ```text
 .github/workflows/docker-ghcr.yml
 ```
 
-Se ejecuta automáticamente cuando haces push sobre la rama `main`.
+Este workflow se ejecuta automáticamente al realizar un `push` sobre la rama `main`.
 
-Publica la imagen en GHCR con estos tags:
+El proceso realiza las siguientes acciones:
+
+* Construye la imagen Docker.
+* Inicia sesión en GitHub Container Registry.
+* Publica la imagen en GHCR.
+* Genera tags de versión y `latest`.
+
+## Versionamiento
+
+La versión inicial del proyecto es:
 
 ```text
 1.0.0
-latest
 ```
 
-El tag versionado sale del archivo:
-
-```text
-VERSION
-```
-
-## 10. Subir a GitHub
-
-Crea un repositorio en GitHub, por ejemplo:
-
-```text
-devops-flask-postgres
-```
-
-Luego ejecuta:
-
-```bash
-git init
-git add .
-git commit -m "Versión inicial 1.0.0"
-git branch -M main
-git remote add origin https://github.com/TU_USUARIO/devops-flask-postgres.git
-git push -u origin main
-```
-
-## 11. Actualizar a versión 2.0.0
-
-Edita el archivo `VERSION`:
+Posteriormente se actualiza a:
 
 ```text
 2.0.0
 ```
 
-Edita también `docker-compose.yml` y cambia:
+El archivo `VERSION` se utiliza para definir la versión publicada de la imagen Docker.
 
-```yaml
-APP_VERSION: "1.0.0"
-image: devops-flask-postgres:1.0.0
-```
+## Autor
 
-por:
-
-```yaml
-APP_VERSION: "2.0.0"
-image: devops-flask-postgres:2.0.0
-```
-
-Luego ejecuta:
-
-```bash
-git add .
-git commit -m "Actualizar aplicación a versión 2.0.0"
-git push origin main
-```
-
-GitHub Actions volverá a ejecutarse automáticamente y publicará:
-
-```text
-ghcr.io/TU_USUARIO/devops-flask-postgres:2.0.0
-ghcr.io/TU_USUARIO/devops-flask-postgres:latest
-```
-
-## 12. Evidencias recomendadas para entregar
-
-Toma capturas de:
-
-1. `docker compose up --build` sin errores.
-2. `docker ps` mostrando PostgreSQL, pgAdmin y Flask.
-3. Ruta principal: `http://localhost:5000`.
-4. Ruta de productos: `http://localhost:5000/productos`.
-5. pgAdmin mostrando la tabla `productos`.
-6. GitHub Actions ejecutado correctamente.
-7. GHCR mostrando los tags `1.0.0`, `2.0.0` y `latest`.
+Andrew Carrera
